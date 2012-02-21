@@ -1,29 +1,38 @@
 package controller;
 import java.io.*;
 import java.util.*;
+
+import org.dom4j.DocumentException;
 import org.joda.time.*;
 import model.*;
 import writers.*;
 import filters.*;
 
 public class TivooController {
-
-    public List<TivooEvent> doFilterByTime(List<TivooEvent> eventlist, DateTime startdate, 
-	    DateTime enddate) {
-	return Filter.filterByTime(eventlist, startdate, enddate);
-    }
-    
-    public List<TivooEvent> doFilterByKeyword(List<TivooEvent> eventlist, String keyword) {
-	return Filter.filterByKeyword(eventlist, keyword);
-    }
-    
-    public void doWriteVerticalTable(List<TivooEvent> eventlist, String outputsummary, 
-	    String outputdetails, DateTime startdate, DateTime enddate) {
-	try {
-	    new VerticalTableWriter().write(eventlist, outputsummary, outputdetails);
-	} catch (IOException e) {
-	    e.printStackTrace();
+	private TivooModel myModel;
+	
+	public TivooController()
+	{
+		myModel = new TivooModel();
 	}
+
+    public void filterByTime(DateTime startdate, DateTime enddate) {
+    	myModel.filterByTime(startdate, enddate);
+    }
+    
+    public void filterByKeyword(String keyword) {
+    	myModel.filterByKeyword(keyword);
+
+    }
+    
+    public void doWriteVerticalTable(String outputsummary, 
+	    String outputdetails, DateTime startdate, DateTime enddate) {
+	myModel.writeVerticalTable(outputsummary, outputdetails, startdate, enddate);
+    }
+    
+    public List<TivooEvent> read(String input) throws DocumentException
+    {
+    	return myModel.read(input);
     }
     
 }

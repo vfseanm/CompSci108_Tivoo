@@ -4,6 +4,9 @@ import java.util.*;
 import org.dom4j.*;
 import org.joda.time.*;
 import org.joda.time.format.*;
+
+import utils.ParserUtils;
+import utils.TivooUtils;
 import model.*;
 
 public class GoogleCalParser implements ITivooParser {
@@ -15,16 +18,15 @@ public class GoogleCalParser implements ITivooParser {
 	  ((Element) doc.selectSingleNode("//*[name()='gCal:timezone']")).attributeValue("value");
 	List<TivooEvent> eventlist = new ArrayList<TivooEvent>();
 	for (Node n: list) {
-	    Node titlefield = n.selectSingleNode("./*[name()='title']");
-	    Node descriptionfield = n.selectSingleNode("./*[name()='content']");
-	    Node timefield = n.selectSingleNode("./*[name()='summary']");
-	    String timestring = timefield.getStringValue();
+		String title = ParserUtils.getInfo(n, "title");
+		String description = ParserUtils.getInfo(n, "content");
+		String timestring = ParserUtils.getInfo(n, "summary");
 	    if (timestring.startsWith("Recurring")) continue;
 	    ArrayList<DateTime> startend = parseOneTimeEvent(timestring, timezone);
 	    if (startend == null) continue;
-	    eventlist.add(new TivooEvent(TivooUtils.sanitizeString(titlefield.getStringValue()), 
+	    eventlist.add(new TivooEvent(TivooUtils.sanitizeString(title), 
 		    startend.get(0), startend.get(1), 
-		    TivooUtils.sanitizeString(descriptionfield.getStringValue())));
+		    TivooUtils.sanitizeString(description)));
 	}
 	return eventlist;
     }
@@ -62,6 +64,12 @@ public class GoogleCalParser implements ITivooParser {
     
     private DateTime parseRecurringEvent() {
 	return null;
+    }
+    
+    public boolean isThisThing(Document doc)
+    {
+    	String rootname = doc.getRootElement().getName();
+    	return (rootname.contentEquals("feed"));
     }
     
 }

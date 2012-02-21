@@ -7,20 +7,31 @@ import parsers.*;
 
 public class TivooReader {
 
-    private static Map<String, ITivooParser> parsermap = new HashMap<String, ITivooParser>();
+    private static ArrayList<ITivooParser> parsers = new ArrayList<ITivooParser>();
     static {
-	parsermap.put("events", new DukeCalParser());
-	parsermap.put("feed", new GoogleCalParser());
+	parsers.add(new DukeCalParser());
+	parsers.add(new GoogleCalParser());
     }
     
     public static List<TivooEvent> read(String input) throws DocumentException {
 	SAXReader reader = new SAXReader();
 	Document doc = reader.read(new File(input));
-	String rootname = doc.getRootElement().getName();
-	ITivooParser theparser = parsermap.get(rootname);
+	ITivooParser theparser = findParser(doc);
+	
 	if (theparser == null)
 	    throw new TivooException("Malformed XML file!");
 	return theparser.convertToList(doc);
+    }
+    
+    private static ITivooParser findParser(Document doc)
+    {
+    	for(ITivooParser p: parsers)
+    	{
+    		if (p.isThisThing(doc))
+    			return p;
+    	}
+    	return null; 
+    	
     }
 
 }
